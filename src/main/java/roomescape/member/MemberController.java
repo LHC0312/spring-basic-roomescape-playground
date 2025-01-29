@@ -3,17 +3,25 @@ package roomescape.member;
 import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.ResponseCookie;
 import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.CookieValue;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.net.URI;
+import roomescape.utility.JwtTokenProvider;
 
 @RestController
 public class MemberController {
     private MemberService memberService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     public MemberController(MemberService memberService) {
         this.memberService = memberService;
@@ -34,4 +42,29 @@ public class MemberController {
         response.addCookie(cookie);
         return ResponseEntity.ok().build();
     }
+
+    @PostMapping("/login")
+    public ResponseEntity login(@RequestBody MemberRequest memberRequest, HttpServletResponse response) {
+        String email = memberRequest.getEmail();
+        String password = memberRequest.getPassword();
+
+        MemberResponse memberResponse = memberService.checkInvalidLogin(email, password);
+
+        String accessToken = jwtTokenProvider.createToken(email);
+        Cookie cookie = new Cookie("token", accessToken);
+        cookie.setHttpOnly(true);
+        cookie.setPath("/");
+        cookie.setMaxAge(3600);
+        response.addCookie(cookie);
+
+        return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/login/check")
+    public ResponseEntity checkLogin(@CookieValue String token) {
+        MemberResponse memberResponse = memberService.getMemberByToken(token);
+        return ResponseEntity.ok().body(memberResponse);
+
+    }
+
 }
