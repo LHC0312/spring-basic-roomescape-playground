@@ -2,12 +2,12 @@ package roomescape.member;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-import roomescape.utility.JwtTokenProvider;
+import roomescape.Auth.JwtTokenProvider;
+import roomescape.Auth.LoginMember;
 
 @Service
 public class MemberService {
     private MemberDao memberDao;
-
 
     @Autowired
     private JwtTokenProvider jwtTokenProvider;
@@ -30,7 +30,7 @@ public class MemberService {
         return new MemberResponse(member.getId(), member.getName(), member.getEmail());
     }
 
-    public MemberResponse getMemberByToken(String acessToken) {
+    public LoginMember getMemberByToken(String acessToken) {
         String email = jwtTokenProvider.getPayload(acessToken);
         Member member = memberDao.findByEmail(email);
 
@@ -38,7 +38,7 @@ public class MemberService {
             throw new RuntimeException("유효하지 않은 토큰 입니다.");
         }
 
-        return new MemberResponse(member.getId(), member.getName(), member.getEmail());
+        return new LoginMember(member.getName(), member.getEmail(), member.getRole());
     }
 
 }

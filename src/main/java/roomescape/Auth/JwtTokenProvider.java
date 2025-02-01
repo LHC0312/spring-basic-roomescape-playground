@@ -1,4 +1,4 @@
-package roomescape.utility;
+package roomescape.Auth;
 
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
