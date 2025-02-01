@@ -7,7 +7,7 @@ public class LoginMember {
   private String role;
 
 
-  public LoginMember(String name, String email, String role) {
+  public LoginMember(long id, String name, String email, String role) {
     this.name = name;
     this.email = email;
     this.role = role;

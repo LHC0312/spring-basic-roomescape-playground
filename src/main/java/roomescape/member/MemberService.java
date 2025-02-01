@@ -38,7 +38,7 @@ public class MemberService {
             throw new RuntimeException("유효하지 않은 토큰 입니다.");
         }
 
-        return new LoginMember(member.getName(), member.getEmail(), member.getRole());
+        return new LoginMember(member.getId(), member.getName(), member.getEmail(), member.getRole());
     }
 
 }

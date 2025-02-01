@@ -1,5 +1,6 @@
 package roomescape.Auth;
 
+import jakarta.servlet.http.Cookie;
 import jakarta.servlet.http.HttpServletRequest;
 import java.util.Arrays;
 import org.springframework.core.MethodParameter;
@@ -12,7 +13,7 @@ import roomescape.member.MemberService;
 
 @Component
 public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolver {
-  private MemberService memberService;
+  private final MemberService memberService;
 
   public LoginMemberArgumentResolver(MemberService memberService) {
     this.memberService = memberService;
@@ -31,10 +32,16 @@ public class LoginMemberArgumentResolver implements HandlerMethodArgumentResolve
 
     HttpServletRequest servletRequest = webRequest.getNativeRequest(HttpServletRequest.class);
 
-    String acessToken = Arrays.stream(servletRequest.getCookies())
+    Cookie[] cookies = servletRequest.getCookies();
+
+    if (cookies == null) {
+      return null;
+    }
+
+    String acessToken = Arrays.stream(cookies)
         .filter(cookie -> "token".equals(cookie.getName())) // "token" 쿠키 찾기
         .findFirst()
-        .orElseThrow(() -> new RuntimeException())
+        .orElse(null)
         .getValue();
 
     return memberService.getMemberByToken(acessToken);

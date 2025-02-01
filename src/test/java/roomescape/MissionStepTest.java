@@ -48,8 +48,8 @@ public class MissionStepTest {
 
     private String createToken(String email, String password) {
         Map<String, String> params = new HashMap<>();
-        params.put("email", "admin@email.com");
-        params.put("password", "password");
+        params.put("email", email);
+        params.put("password", password);
 
         ExtractableResponse<Response> response = RestAssured.given().log().all()
             .contentType(ContentType.JSON)
@@ -64,7 +64,8 @@ public class MissionStepTest {
 
     @Test
     void 이단계() {
-        String token = createToken("admin@email.com", "password");  // 일단계에서 토큰을 추출하는 로직을 메서드로 따로 만들어서 활용하세요.
+        String token = createToken("admin@email.com",
+            "password");  // 일단계에서 토큰을 추출하는 로직을 메서드로 따로 만들어서 활용하세요.
 
         Map<String, String> params = new HashMap<>();
         params.put("date", "2024-03-01");
@@ -94,5 +95,24 @@ public class MissionStepTest {
 
         assertThat(adminResponse.statusCode()).isEqualTo(201);
         assertThat(adminResponse.as(ReservationResponse.class).getName()).isEqualTo("브라운");
+    }
+
+    @Test
+    void 삼단계() {
+        String brownToken = createToken("brown@email.com", "password");
+
+        RestAssured.given().log().all()
+            .cookie("token", brownToken)
+            .get("/admin/time")
+            .then().log().all()
+            .statusCode(401);
+
+        String adminToken = createToken("admin@email.com", "password");
+
+        RestAssured.given().log().all()
+            .cookie("token", adminToken)
+            .get("/admin/time")
+            .then().log().all()
+            .statusCode(200);
     }
 }
